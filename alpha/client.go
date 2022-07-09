@@ -14,14 +14,14 @@ type config struct {
 	}
 }
 
-type AlphaClient struct {
+type Client struct {
 	cfg        config
 	httpClient *http.Client
 	logger     *jsonlog.Logger
 }
 
-func NewClient(baseUrl, token string) *AlphaClient {
-	return &AlphaClient{
+func NewClient(baseUrl, token string) *Client {
+	return &Client{
 		cfg: config{
 			token:   token,
 			baseUrl: baseUrl,
@@ -33,12 +33,12 @@ func NewClient(baseUrl, token string) *AlphaClient {
 	}
 }
 
-func (c *AlphaClient) WithBaseUrl(url string) *AlphaClient {
+func (c *Client) WithBaseUrl(url string) *Client {
 	c.cfg.baseUrl = url
 	return c
 }
 
-func (c *AlphaClient) WithHttpClient(httpClient *http.Client) *AlphaClient {
+func (c *Client) WithHttpClient(httpClient *http.Client) *Client {
 	c.httpClient = httpClient
 	return c
 }

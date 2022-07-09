@@ -7,55 +7,89 @@ import (
 	"github.com/mhamm84/gofinance-alpha/alpha/data"
 )
 
-//CPI
-//This API returns the monthly and semiannual consumer price index (CPI) of the United States. CPI is widely regarded as the barometer of inflation levels in the broader economy.
-//https://www.alphavantage.co/query?function=CPI&interval=monthly&apikey=demo
+const (
+	cpi               string = "CPI"
+	consumerSentiment string = "CONSUMER_SENTIMENT"
+	treasuryYield     string = "TREASURY_YIELD"
+)
 
-type CpiOptions struct {
-	Interval CpiInterval `url:"interval"`
+type Options struct {
+	Interval Interval `url:"interval"`
+	Maturity Maturity `url:"maturity"`
 }
 
-func (c *AlphaClient) Cpi(opts *CpiOptions) (*data.CpiResponse, error) {
-	endpoint, err := createCpiEndpoint(c.cfg.baseUrl, c.cfg.token, opts)
+func (c *Client) TreasuryYield(opts *Options) (*data.EconomicResponse, error) {
+	endpoint, err := createEndpoint(c.cfg.baseUrl, c.cfg.token, treasuryYield, opts)
 	if err != nil {
 		return nil, err
 	}
-	response, err := c.httpClient.Get(endpoint)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-		err := response.Body.Close()
-		if err != nil {
-			c.logger.PrintError(err, nil)
-		}
-	}()
-
-	cpiResponse := &data.CpiResponse{}
-	decoder := json.NewDecoder(response.Body)
-	decoder.Decode(cpiResponse)
-	return cpiResponse, nil
+	return get(c, endpoint)
 }
 
-func createCpiEndpoint(baseUrl string, token string, opts *CpiOptions) (string, error) {
+func (c *Client) Cpi(opts *Options) (*data.EconomicResponse, error) {
 	if opts == nil {
-		opts = &CpiOptions{
+		opts = &Options{
 			Interval: Monthly,
 		}
 	}
 	if opts.Interval != Monthly && opts.Interval != SemiAnnual {
 		opts.Interval = Monthly
 	}
+	endpoint, err := createEndpoint(c.cfg.baseUrl, c.cfg.token, cpi, opts)
+	if err != nil {
+		return nil, err
+	}
+	return get(c, endpoint)
+}
+
+func (c *Client) ConsumerSentiment(opts *Options) (*data.EconomicResponse, error) {
+	endpoint, err := createEndpoint(c.cfg.baseUrl, c.cfg.token, consumerSentiment, opts)
+	if err != nil {
+		return nil, err
+	}
+	return get(c, endpoint)
+}
+
+func get(c *Client, endpoint string) (*data.EconomicResponse, error) {
+	httpRes, err := c.httpClient.Get(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		err := httpRes.Body.Close()
+		if err != nil {
+			c.logger.PrintError(err, nil)
+		}
+	}()
+
+	responseData := &data.EconomicResponse{}
+	decoder := json.NewDecoder(httpRes.Body)
+	decoder.Decode(responseData)
+	return responseData, nil
+}
+
+func createEndpoint(baseUrl string, token string, function string, opts *Options) (string, error) {
+	if opts == nil {
+		opts = &Options{Interval: 0, Maturity: 0}
+	}
+
 	params := struct {
-		Function string      `url:"function"`
-		Interval CpiInterval `url:"interval"`
-		Token    string      `url:"apikey"`
+		Function string   `url:"function"`
+		Interval Interval `url:"interval,omitempty"`
+		Maturity Maturity `url:"maturity,omitempty"`
+		Token    string   `url:"apikey"`
 	}{
-		Function: "CPI",
+		Function: function,
 		Interval: opts.Interval,
+		Maturity: opts.Maturity,
 		Token:    token,
 	}
+
+	fmt.Println(params)
+
 	v, _ := query.Values(&params)
+
+	fmt.Println(v)
 	return fmt.Sprintf("%s?%s", baseUrl, v.Encode()), nil
 }
