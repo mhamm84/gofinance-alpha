@@ -86,10 +86,7 @@ func createEndpoint(baseUrl string, token string, function string, opts *Options
 		Token:    token,
 	}
 
-	fmt.Println(params)
-
 	v, _ := query.Values(&params)
-
-	fmt.Println(v)
+	
 	return fmt.Sprintf("%s?%s", baseUrl, v.Encode()), nil
 }
