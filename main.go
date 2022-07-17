@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/mhamm84/gofinance-alpha/alpha"
@@ -19,7 +20,8 @@ func main() {
 		Maturity: alpha.ThreeMonth,
 	}
 
-	data, err := client.TreasuryYield(opts)
+	ctx := context.Background()
+	data, err := client.TreasuryYield(ctx, opts)
 	if err != nil {
 		panic(err)
 	}

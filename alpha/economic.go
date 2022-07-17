@@ -1,10 +1,12 @@
 package alpha
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/google/go-querystring/query"
 	"github.com/mhamm84/gofinance-alpha/alpha/data"
+	"net/http"
 )
 
 const (
@@ -19,15 +21,15 @@ type Options struct {
 	Maturity Maturity `url:"maturity"`
 }
 
-func (c *Client) RetailSales(opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(c, retailSales, opts)
+func (c *Client) RetailSales(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
+	return createAndSend(ctx, c, retailSales, opts)
 }
 
-func (c *Client) TreasuryYield(opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(c, treasuryYield, opts)
+func (c *Client) TreasuryYield(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
+	return createAndSend(ctx, c, treasuryYield, opts)
 }
 
-func (c *Client) Cpi(opts *Options) (*data.EconomicResponse, error) {
+func (c *Client) Cpi(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
 	if opts == nil {
 		opts = &Options{
 			Interval: Monthly,
@@ -36,19 +38,22 @@ func (c *Client) Cpi(opts *Options) (*data.EconomicResponse, error) {
 	if opts.Interval != Monthly && opts.Interval != SemiAnnual {
 		opts.Interval = Monthly
 	}
-	return createAndSend(c, cpi, opts)
+	return createAndSend(ctx, c, cpi, opts)
 }
 
-func (c *Client) ConsumerSentiment(opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(c, consumerSentiment, opts)
+func (c *Client) ConsumerSentiment(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
+	return createAndSend(ctx, c, consumerSentiment, opts)
 }
 
-func get(c *Client, endpoint string) (*data.EconomicResponse, error) {
-	httpRes, err := c.httpClient.Get(endpoint)
+func get(ctx context.Context, c *Client, endpoint string) (*data.EconomicResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, err
 	}
-
+	httpRes, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
 	defer func() {
 		err := httpRes.Body.Close()
 		if err != nil {
@@ -58,16 +63,20 @@ func get(c *Client, endpoint string) (*data.EconomicResponse, error) {
 
 	responseData := &data.EconomicResponse{}
 	decoder := json.NewDecoder(httpRes.Body)
-	decoder.Decode(responseData)
+	err = decoder.Decode(responseData)
+	if err != nil {
+		return nil, err
+	}
+
 	return responseData, nil
 }
 
-func createAndSend(c *Client, function string, opts *Options) (*data.EconomicResponse, error) {
+func createAndSend(ctx context.Context, c *Client, function string, opts *Options) (*data.EconomicResponse, error) {
 	endpoint, err := createEndpoint(c.cfg.baseUrl, c.cfg.token, function, opts)
 	if err != nil {
 		return nil, err
 	}
-	return get(c, endpoint)
+	return get(ctx, c, endpoint)
 }
 
 func createEndpoint(baseUrl string, token string, function string, opts *Options) (string, error) {
