@@ -20,6 +20,7 @@ type Client struct {
 	logger     *jsonlog.Logger
 }
 
+// NewClient creates a new Alpha Vantage client using a baseUrl and the token
 func NewClient(baseUrl, token string) *Client {
 	return &Client{
 		cfg: config{
@@ -33,11 +34,13 @@ func NewClient(baseUrl, token string) *Client {
 	}
 }
 
+// WithBaseUrl overrides the baseUrl
 func (c *Client) WithBaseUrl(url string) *Client {
 	c.cfg.baseUrl = url
 	return c
 }
 
+// WithHttpClient overrides the httpClient
 func (c *Client) WithHttpClient(httpClient *http.Client) *Client {
 	c.httpClient = httpClient
 	return c

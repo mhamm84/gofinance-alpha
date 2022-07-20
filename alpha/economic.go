@@ -2,11 +2,11 @@ package alpha
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/google/go-querystring/query"
 	"github.com/mhamm84/gofinance-alpha/alpha/data"
-	"net/http"
+	"strings"
 )
 
 const (
@@ -21,54 +21,24 @@ type Options struct {
 	Maturity Maturity `url:"maturity"`
 }
 
+// RetailSales Gets data from the retail sales endpoint
 func (c *Client) RetailSales(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
 	return createAndSend(ctx, c, retailSales, opts)
 }
 
+// TreasuryYield Gets data from the treasury yield endpoint
 func (c *Client) TreasuryYield(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
 	return createAndSend(ctx, c, treasuryYield, opts)
 }
 
+// Cpi Gets data from the CPI endpoint
 func (c *Client) Cpi(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	if opts == nil {
-		opts = &Options{
-			Interval: Monthly,
-		}
-	}
-	if opts.Interval != Monthly && opts.Interval != SemiAnnual {
-		opts.Interval = Monthly
-	}
 	return createAndSend(ctx, c, cpi, opts)
 }
 
+// ConsumerSentiment Gets data from the consumer sentiment endpoint
 func (c *Client) ConsumerSentiment(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
 	return createAndSend(ctx, c, consumerSentiment, opts)
-}
-
-func get(ctx context.Context, c *Client, endpoint string) (*data.EconomicResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
-	if err != nil {
-		return nil, err
-	}
-	httpRes, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		err := httpRes.Body.Close()
-		if err != nil {
-			c.logger.PrintError(err, nil)
-		}
-	}()
-
-	responseData := &data.EconomicResponse{}
-	decoder := json.NewDecoder(httpRes.Body)
-	err = decoder.Decode(responseData)
-	if err != nil {
-		return nil, err
-	}
-
-	return responseData, nil
 }
 
 func createAndSend(ctx context.Context, c *Client, function string, opts *Options) (*data.EconomicResponse, error) {
@@ -76,10 +46,26 @@ func createAndSend(ctx context.Context, c *Client, function string, opts *Option
 	if err != nil {
 		return nil, err
 	}
-	return get(ctx, c, endpoint)
+
+	responseData := &data.EconomicResponse{}
+	err = GetAndDecode(ctx, c.httpClient, endpoint, responseData)
+	if err != nil {
+		return nil, err
+	}
+
+	return responseData, nil
 }
 
 func createEndpoint(baseUrl string, token string, function string, opts *Options) (string, error) {
+	if strings.TrimSpace(baseUrl) == "" {
+		return "", errors.New("baseUrl cannot be empty")
+	}
+	if strings.TrimSpace(token) == "" {
+		return "", errors.New("token cannot be empty")
+	}
+	if strings.TrimSpace(function) == "" {
+		return "", errors.New("function cannot be empty")
+	}
 	if opts == nil {
 		opts = &Options{Interval: 0, Maturity: 0}
 	}
@@ -95,8 +81,7 @@ func createEndpoint(baseUrl string, token string, function string, opts *Options
 		Maturity: opts.Maturity,
 		Token:    token,
 	}
-
 	v, _ := query.Values(&params)
 
-	return fmt.Sprintf("%s?%s", baseUrl, v.Encode()), nil
+	return strings.TrimSpace(fmt.Sprintf("%s?%s", baseUrl, v.Encode())), nil
 }

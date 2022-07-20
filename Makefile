@@ -20,4 +20,4 @@ audit:
 	staticcheck
 
 	@echo 'Running tests...'
-	go test -race -vet=off
+	go test ./... -race -vet=off
