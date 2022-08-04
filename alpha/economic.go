@@ -14,11 +14,23 @@ const (
 	consumerSentiment string = "CONSUMER_SENTIMENT"
 	treasuryYield     string = "TREASURY_YIELD"
 	retailSales       string = "RETAIL_SALES"
+	realGdp           string = "REAL_GDP"
+	realGdpPerCapita  string = "REAL_GDP_PER_CAPITA"
 )
 
 type Options struct {
 	Interval Interval `url:"interval"`
 	Maturity Maturity `url:"maturity"`
+}
+
+// GdpPerCapita Gets data from the real GDP per capita of the United States
+func (c *Client) GdpPerCapita(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
+	return createAndSend(ctx, c, realGdpPerCapita, opts)
+}
+
+// Gdp Gets data from the real GDP of the United States
+func (c *Client) Gdp(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
+	return createAndSend(ctx, c, realGdp, opts)
 }
 
 // RetailSales Gets data from the retail sales endpoint

@@ -5,7 +5,9 @@ type Interval int8
 const (
 	Daily Interval = iota + 1
 	Monthly
+	Quarterly
 	SemiAnnual
+	Annual
 )
 
 func (c Interval) String() string {
@@ -14,8 +16,12 @@ func (c Interval) String() string {
 		return "daily"
 	case Monthly:
 		return "monthly"
+	case Quarterly:
+		return "quarterly"
 	case SemiAnnual:
 		return "semiannual"
+	case Annual:
+		return "annual"
 	}
 	return "unknown"
 }
