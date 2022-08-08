@@ -16,6 +16,7 @@ const (
 	retailSales       string = "RETAIL_SALES"
 	realGdp           string = "REAL_GDP"
 	realGdpPerCapita  string = "REAL_GDP_PER_CAPITA"
+	string                   = "FEDERAL_FUNDS_RATE"
 )
 
 type Options struct {
@@ -23,12 +24,17 @@ type Options struct {
 	Maturity Maturity `url:"maturity"`
 }
 
+// FederalFundsRate Gets daily, weekly, and monthly federal funds rate (interest rate) of the United States.
+func (c *Client) FederalFundsRate(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
+	return createAndSend(ctx, c, federalFundsRate, opts)
+}
+
 // GdpPerCapita Gets data from the real GDP per capita of the United States
 func (c *Client) GdpPerCapita(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
 	return createAndSend(ctx, c, realGdpPerCapita, opts)
 }
 
-// Gdp Gets data from the real GDP of the United States
+// Gdp gets the annual and quarterly Real GDP of the United States.
 func (c *Client) Gdp(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
 	return createAndSend(ctx, c, realGdp, opts)
 }
