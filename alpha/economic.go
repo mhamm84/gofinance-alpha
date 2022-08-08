@@ -16,7 +16,7 @@ const (
 	retailSales       string = "RETAIL_SALES"
 	realGdp           string = "REAL_GDP"
 	realGdpPerCapita  string = "REAL_GDP_PER_CAPITA"
-	string                   = "FEDERAL_FUNDS_RATE"
+	federalFundsRate  string = "FEDERAL_FUNDS_RATE"
 )
 
 type Options struct {
