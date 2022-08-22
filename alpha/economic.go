@@ -30,6 +30,7 @@ const (
 	REAL_GDP
 	REAL_GEP_PER_CAPITA
 	FED_FUNDS_RATE
+	DURABLE_GOODS
 )
 
 func getApiFunction(reportType ReportType) string {
@@ -48,6 +49,8 @@ func getApiFunction(reportType ReportType) string {
 		return realGdpPerCapita
 	case FED_FUNDS_RATE:
 		return federalFundsRate
+	case DURABLE_GOODS:
+		return durableGoodsOrders
 	default:
 		return "unknown"
 	}
