@@ -21,7 +21,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	data, err := client.TreasuryYield(ctx, opts)
+	data, err := client.EconomicData(ctx, alpha.TREASURY_YIELD, opts)
 	if err != nil {
 		panic(err)
 	}

@@ -10,53 +10,57 @@ import (
 )
 
 const (
-	cpi               string = "CPI"
-	consumerSentiment string = "CONSUMER_SENTIMENT"
-	treasuryYield     string = "TREASURY_YIELD"
-	retailSales       string = "RETAIL_SALES"
-	realGdp           string = "REAL_GDP"
-	realGdpPerCapita  string = "REAL_GDP_PER_CAPITA"
-	federalFundsRate  string = "FEDERAL_FUNDS_RATE"
+	cpi                string = "CPI"
+	consumerSentiment  string = "CONSUMER_SENTIMENT"
+	treasuryYield      string = "TREASURY_YIELD"
+	retailSales        string = "RETAIL_SALES"
+	realGdp            string = "REAL_GDP"
+	realGdpPerCapita   string = "REAL_GDP_PER_CAPITA"
+	federalFundsRate   string = "FEDERAL_FUNDS_RATE"
+	durableGoodsOrders string = "DURABLES"
 )
+
+type ReportType int
+
+const (
+	CPI ReportType = iota
+	CONSUMER_SENTIMENT
+	TREASURY_YIELD
+	RETAIL_SALES
+	REAL_GDP
+	REAL_GEP_PER_CAPITA
+	FED_FUNDS_RATE
+)
+
+func getApiFunction(reportType ReportType) string {
+	switch reportType {
+	case CPI:
+		return cpi
+	case CONSUMER_SENTIMENT:
+		return consumerSentiment
+	case TREASURY_YIELD:
+		return treasuryYield
+	case RETAIL_SALES:
+		return retailSales
+	case REAL_GDP:
+		return realGdp
+	case REAL_GEP_PER_CAPITA:
+		return realGdpPerCapita
+	case FED_FUNDS_RATE:
+		return federalFundsRate
+	default:
+		return "unknown"
+	}
+}
 
 type Options struct {
 	Interval Interval `url:"interval"`
 	Maturity Maturity `url:"maturity"`
 }
 
-// FederalFundsRate Gets daily, weekly, and monthly federal funds rate (interest rate) of the United States.
-func (c *Client) FederalFundsRate(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(ctx, c, federalFundsRate, opts)
-}
-
-// GdpPerCapita Gets data from the real GDP per capita of the United States
-func (c *Client) GdpPerCapita(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(ctx, c, realGdpPerCapita, opts)
-}
-
-// Gdp gets the annual and quarterly Real GDP of the United States.
-func (c *Client) Gdp(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(ctx, c, realGdp, opts)
-}
-
-// RetailSales Gets data from the retail sales endpoint
-func (c *Client) RetailSales(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(ctx, c, retailSales, opts)
-}
-
-// TreasuryYield Gets data from the treasury yield endpoint
-func (c *Client) TreasuryYield(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(ctx, c, treasuryYield, opts)
-}
-
-// Cpi Gets data from the CPI endpoint
-func (c *Client) Cpi(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(ctx, c, cpi, opts)
-}
-
-// ConsumerSentiment Gets data from the consumer sentiment endpoint
-func (c *Client) ConsumerSentiment(ctx context.Context, opts *Options) (*data.EconomicResponse, error) {
-	return createAndSend(ctx, c, consumerSentiment, opts)
+// EconomicData Gets the monthly manufacturers' new orders of durable goods in the United States.
+func (c *Client) EconomicData(ctx context.Context, reportType ReportType, opts *Options) (*data.EconomicResponse, error) {
+	return createAndSend(ctx, c, getApiFunction(reportType), opts)
 }
 
 func createAndSend(ctx context.Context, c *Client, function string, opts *Options) (*data.EconomicResponse, error) {
