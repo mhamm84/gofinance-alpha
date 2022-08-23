@@ -10,14 +10,18 @@ import (
 )
 
 const (
-	cpi                string = "CPI"
-	consumerSentiment  string = "CONSUMER_SENTIMENT"
-	treasuryYield      string = "TREASURY_YIELD"
-	retailSales        string = "RETAIL_SALES"
-	realGdp            string = "REAL_GDP"
-	realGdpPerCapita   string = "REAL_GDP_PER_CAPITA"
-	federalFundsRate   string = "FEDERAL_FUNDS_RATE"
-	durableGoodsOrders string = "DURABLES"
+	cpi                  string = "CPI"
+	consumerSentiment    string = "CONSUMER_SENTIMENT"
+	treasuryYield        string = "TREASURY_YIELD"
+	retailSales          string = "RETAIL_SALES"
+	realGdp              string = "REAL_GDP"
+	realGdpPerCapita     string = "REAL_GDP_PER_CAPITA"
+	federalFundsRate     string = "FEDERAL_FUNDS_RATE"
+	durableGoodsOrders   string = "DURABLES"
+	unemployment         string = "UNEMPLOYMENT"
+	nonfarmPayroll       string = "NONFARM_PAYROLL"
+	inflation            string = "INFLATION"
+	inflationExpectation string = "INFLATION_EXPECTATION"
 )
 
 type ReportType int
@@ -28,9 +32,13 @@ const (
 	TREASURY_YIELD
 	RETAIL_SALES
 	REAL_GDP
-	REAL_GEP_PER_CAPITA
+	REAL_GDP_PER_CAPITA
 	FED_FUNDS_RATE
 	DURABLE_GOODS
+	UNEMPLOYMENT
+	NONFARM_PAYROLL
+	INFLATION
+	INFLATION_EXPECTATION
 )
 
 func getApiFunction(reportType ReportType) string {
@@ -45,12 +53,20 @@ func getApiFunction(reportType ReportType) string {
 		return retailSales
 	case REAL_GDP:
 		return realGdp
-	case REAL_GEP_PER_CAPITA:
+	case REAL_GDP_PER_CAPITA:
 		return realGdpPerCapita
 	case FED_FUNDS_RATE:
 		return federalFundsRate
 	case DURABLE_GOODS:
 		return durableGoodsOrders
+	case UNEMPLOYMENT:
+		return unemployment
+	case NONFARM_PAYROLL:
+		return nonfarmPayroll
+	case INFLATION:
+		return inflation
+	case INFLATION_EXPECTATION:
+		return inflationExpectation
 	default:
 		return "unknown"
 	}
